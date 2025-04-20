@@ -1,52 +1,67 @@
-class XGatter:
-    def __init__(self, name, zustand, wert):
+class Gatter:
+    def __init__(self, name, richtung, wert):
         self.name = name
-        self.zustand = zustand
+        self.richtung = richtung
         self.wert = wert
 
-    def energie_uebertragen(self, ziel_gatter):
-        print(f"{self.name} ({self.zustand}) überträgt Energie ({self.wert}) zu {ziel_gatter.name}")
-        ziel_gatter.wert += self.wert
-
     def invertiere_zustand(self):
-        if self.zustand == "1→2":
-            self.zustand = "2→1"
-        elif self.zustand == "2→1":
-            self.zustand = "1→2"
-        print(f"{self.name} invertiert Zustand zu {self.zustand}")
+        if self.richtung == "1→2":
+            self.richtung = "2→1"
+        else:
+            self.richtung = "1→2"
+
+    def __str__(self):
+        return f"Gatter {self.name} ({self.richtung}), Wert: {self.wert}"
+
+
+class Zentrum:
+    def __init__(self, wert):
+        self.wert = wert
+
+    def __str__(self):
+        return f"Zentrum C: Zustand neutral, Wert: {self.wert}"
 
 
 class BewegungslogikEmulator:
     def __init__(self):
-        self.gatter_a = XGatter("Gatter A", "1→2", 3)
-        self.gatter_b = XGatter("Gatter B", "2→1", 3)
-        self.gatter_c = XGatter("Zentrum C", "neutral", 5)
+        self.gatter_a = Gatter("A", "1→2", 3)
+        self.gatter_b = Gatter("B", "2→1", 3)
+        self.gatter_c = Zentrum(5)
         self.freie_einheit = 0
 
-    def zyklus(self):
-        self.gatter_a.energie_uebertragen(self.gatter_c)
-        self.gatter_b.energie_uebertragen(self.gatter_c)
+    def durchlauf(self, zyklen=10):
+        for i in range(1, zyklen + 1):
+            print(f"\n--- Zyklus {i} ---")
+            print(f"{self.gatter_a.name} ({self.gatter_a.richtung}) überträgt Energie ({self.gatter_a.wert}) zu Zentrum C")
+            print(f"{self.gatter_b.name} ({self.gatter_b.richtung}) überträgt Energie ({self.gatter_b.wert}) zu Zentrum C")
 
-        if self.gatter_c.wert == 11:
-            print("\nEnergetischer Kollaps! Zustand 11 erreicht.\n")
-            self.gatter_c.wert = 5
-            self.freie_einheit += 1
-            print(f"Freie energetische Einheit erzeugt (Impulsgeber): {self.freie_einheit}")
-            self.gatter_a.invertiere_zustand()
-            self.gatter_b.invertiere_zustand()
+            # Energieübertragung
+            self.gatter_c.wert = self.gatter_a.wert + self.gatter_c.wert + self.gatter_b.wert
 
-        print("Status nach Zyklus:")
-        print(f"  {self.gatter_a.name}: {self.gatter_a.zustand}, Wert: {self.gatter_a.wert}")
-        print(f"  {self.gatter_b.name}: {self.gatter_b.zustand}, Wert: {self.gatter_b.wert}")
-        print(f"  {self.gatter_c.name}: Zustand neutral, Wert: {self.gatter_c.wert}\n")
+            # Komprimierungszustand erkennen
+            if self.gatter_c.wert == 11:
+                print("\nEnergetischer Kollaps (11)! Komprimierung zu 'Baggerschaufeln' [1-1]...\n")
+                schaufel_intern = 1
+                schaufel_extern = 1
 
+                print(f"Differenzierte Einheiten [1-1] erzeugt.")
+                self.gatter_c.wert = 5  # Rückführung über interne Schaufel
+                print("Zentrum C kehrt durch Integration zum Basiswert 5 zurück.")
 
-def starte_emulation(zyklen=5):
-    emulator = BewegungslogikEmulator()
-    for zyklus in range(zyklen):
-        print(f"\n--- Zyklus {zyklus + 1} ---")
-        emulator.zyklus()
+                self.freie_einheit += schaufel_extern
+                print(f"Freie energetische Einheit ({schaufel_extern}) erzeugt (Impulsgeber): {self.freie_einheit}")
+
+                self.gatter_a.invertiere_zustand()
+                self.gatter_b.invertiere_zustand()
+            else:
+                print("Kein Kollaps. Zentrum C stabil.")
+
+            print("Status nach Zyklus:")
+            print(f"  {self.gatter_a}")
+            print(f"  {self.gatter_b}")
+            print(f"  {self.gatter_c}")
 
 
 if __name__ == "__main__":
-    starte_emulation(10)
+    emulator = BewegungslogikEmulator()
+    emulator.durchlauf(10)
